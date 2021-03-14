@@ -1,0 +1,59 @@
+<ng-container *ngIf="{
+  records: records$ | async,
+  loading: loading$ | async,
+  totalRecords: totalRecords$ | async,
+  pagination: pagination$ | async
+} as observable">
+
+  <p-table
+    [paginator]="!usePaginator"
+    [lazy]="!usePaginator"
+    [value]="observable.pagination.data"
+    [loading]="observable.loading"
+    [rowsPerPageOptions]="[3,5,10]"
+    [totalRecords]="observable.totalRecords"
+    [(rows)]="rows"
+    [(first)]="first"
+    (onLazyLoad)="loadRecords($event)"
+    >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Id</th>
+        <th>Наименование</th>
+        <th>Системное имя</th>
+        <th>Тип данных</th>
+        <th>Описание</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-record>
+      <tr>
+        <td>{{ record.id }}</td>
+        <td>{{ record.name }}</td>
+        <td>{{ record.systemName }}</td>
+        <td>{{ record.dataType }}</td>
+        <td>{{ record.description }}</td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <div *ngIf="usePaginator" class="paginator__controls">
+    <div>
+      На странице &nbsp;
+      <p-dropdown
+        optionLabel="name"
+        optionValue="code"
+        [options]="dropdownOptions"
+        [ngModel]="rows"
+        (onChange)="dropdownChangeHandler($event)"
+        >
+      </p-dropdown>
+    </div>
+    <div>
+      Страница {{ paginatorRef.currentPage }} из {{ '' }}
+    </div>
+    <p-button type="button" icon="pi pi-chevron-left" (click)="paginatorRef.prevPage()" [disabled]="paginatorRef.isFirst" styleClass="p-button-text"></p-button>
+    <p-button type="button" icon="pi pi-chevron-right" (click)="paginatorRef.nextPage()" [disabled]="paginatorRef.isLast" styleClass="p-button-text"></p-button>
+  </div>
+
+</ng-container>
+
