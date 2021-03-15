@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { PaginationResponse } from '@datorama/akita';
 import { Observable } from 'rxjs';
 import { Record } from '../models/record.model';
-import { TableData } from '../models/response.model';
 import { RecordsStore } from '../state/record.store';
 
 @Injectable({
@@ -16,28 +15,17 @@ export class RecordsService {
     private recordsStore: RecordsStore,
   ) { }
 
-  public getData(first: number = 0, rows?: number): void {
-    let params = new HttpParams()
-      .set('first', first.toString());
 
-    if (rows) {
-      params = params.set('rows', rows.toString());
-    }
-
-    this.http.get<TableData>('', { params })
-      .subscribe((response: TableData) => {
-        this.recordsStore.setRecords(response.records);
-        this.recordsStore.setTotalRecords(response.totalRecords);
-      })
-  }
-
-  public getPaginateData(page: number = 1, perPage: number = 5): Observable<PaginationResponse<Record>> {
+  public getData(page: number = 1, perPage: number = 5): void {
     let params = new HttpParams()
       .set('page', page.toString());
 
     if (perPage) {
       params = params.set('perPage', perPage.toString());
     }
-    return this.http.get<PaginationResponse<Record>>('', {params});
+    this.http.get<PaginationResponse<Record>>('', { params })
+      .subscribe((response: PaginationResponse<Record>) => {
+        this.recordsStore.setState(response);
+      })
   }
 }

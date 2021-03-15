@@ -1,17 +1,15 @@
 import { Injectable } from '@angular/core';
-import { EntityState, EntityStore, StoreConfig } from '@datorama/akita';
+import { EntityState, EntityStore, PaginationResponse, StoreConfig } from '@datorama/akita';
 import { Record } from '../models/record.model';
 
-export interface RecordsState extends EntityState<Record, Record['id']> {
-  totalRecords: number;
-  first: number;
-  rows: number;
+export interface RecordsState extends PaginationResponse<Record> {
 }
 
 const createInitialState = (): RecordsState => ({
-  totalRecords: 0,
-  first: 0,
-  rows: 0,
+  currentPage: 0,
+  lastPage: 0,
+  perPage: 1,
+  data: [],
 })
 
 @Injectable({
@@ -19,7 +17,6 @@ const createInitialState = (): RecordsState => ({
 })
 @StoreConfig({
   name: 'records',
-  idKey: 'id',
   resettable: true,
 })
 export class RecordsStore extends EntityStore<RecordsState> {
@@ -27,15 +24,12 @@ export class RecordsStore extends EntityStore<RecordsState> {
     super(createInitialState());
   }
 
-  public setRecords(records: Record[]): void {
-    this.set(records);
-  }
-
-  public setTotalRecords(totalRecords: number): void {
-    const currentTotalRecoords = this.getValue().totalRecords;
-
-    if (totalRecords !== currentTotalRecoords) {
-      this.update({totalRecords});
-    }
+  public setState(data: RecordsState): void {
+    this.update({
+      currentPage: data.currentPage,
+      data: data.data,
+      lastPage: data.lastPage,
+      perPage: data.perPage,
+    });
   }
 }

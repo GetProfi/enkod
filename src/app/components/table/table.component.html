@@ -1,20 +1,14 @@
 <ng-container *ngIf="{
-  records: records$ | async,
   loading: loading$ | async,
-  totalRecords: totalRecords$ | async,
+  totalPage: totalPage$ | async,
   pagination: pagination$ | async
 } as observable">
 
   <p-table
-    [paginator]="!usePaginator"
-    [lazy]="!usePaginator"
     [value]="observable.pagination.data"
     [loading]="observable.loading"
-    [rowsPerPageOptions]="[3,5,10]"
-    [totalRecords]="observable.totalRecords"
     [(rows)]="rows"
     [(first)]="first"
-    (onLazyLoad)="loadRecords($event)"
     >
     <ng-template pTemplate="header">
       <tr>
@@ -49,7 +43,7 @@
       </p-dropdown>
     </div>
     <div>
-      Страница {{ paginatorRef.currentPage }} из {{ '' }}
+      Страница {{ paginatorRef.currentPage }} из {{ observable.totalPage }}
     </div>
     <p-button type="button" icon="pi pi-chevron-left" (click)="paginatorRef.prevPage()" [disabled]="paginatorRef.isFirst" styleClass="p-button-text"></p-button>
     <p-button type="button" icon="pi pi-chevron-right" (click)="paginatorRef.nextPage()" [disabled]="paginatorRef.isLast" styleClass="p-button-text"></p-button>

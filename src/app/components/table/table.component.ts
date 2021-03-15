@@ -1,8 +1,10 @@
+import { state } from '@angular/animations';
 import { ChangeDetectionStrategy, Component, Inject, Input, OnDestroy } from '@angular/core';
-import { PaginationResponse, PaginatorPlugin } from '@datorama/akita';
+import { PaginatorPlugin } from '@datorama/akita';
 import { LazyLoadEvent } from 'primeng/api';
-import { Observable, Subject } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { map, takeUntil, tap } from 'rxjs/operators';
+import { PER_PAGE } from '../../constant';
 import { Record } from '../../models/record.model';
 import { RecordsService } from '../../services/records.service';
 import { RecordsState } from '../../state/record.store';
@@ -20,27 +22,18 @@ export class TableComponent implements OnDestroy {
   @Input('paginator')
   public usePaginator = true;
 
-  public pagination$: Observable<PaginationResponse<unknown>>;
-
-  public records$ = this.recordsQuery.selectAll()
-    .pipe(
-      tap((records: Record[]) => {
-        if (records) {
-          this.loading$.next(false);
-        }
-      })
-    );
+  public pagination$ = this.recordsQuery.select()
+    .pipe(tap(() => this.loading$.next(false)));
 
   public totalRecords$ = this.recordsQuery.select()
-    .pipe(map((state: RecordsState) => state.totalRecords))
+    .pipe(map((state: RecordsState) => state.lastPage * state.perPage));
+
+  public totalPage$ = this.recordsQuery.select()
+    .pipe(map((state: RecordsState) => state.lastPage));
 
   public loading$ = new Subject<boolean>();
 
-  public dropdownOptions = [
-    {name: '3', code: 3},
-    {name: '5', code: 5},
-    {name: '10', code: 10},
-  ];
+  public dropdownOptions = PER_PAGE;
 
   public rows = 5;
 
@@ -55,24 +48,18 @@ export class TableComponent implements OnDestroy {
   ) {}
 
   public ngOnInit(): void {
-    this.pagination$ = this.paginatorRef.pageChanges.pipe(
-      switchMap((page: number) => {
-        console.log(page, this.rows)
-        const reqFn = () => this.recordsService.getPaginateData(page, this.rows);
-        return this.paginatorRef.getPage(reqFn);
-      }),
-      tap(v => console.log(v))
-    )
+    this.paginatorRef.pageChanges
+      .pipe(
+        takeUntil(this.unsub$),
+        tap(() => this.loading$.next(true)),
+        tap((page: number) => this.recordsService.getData(page, this.rows)),
+      )
+      .subscribe();
   }
 
   public ngOnDestroy(): void {
     this.unsub$.next(null);
     this.unsub$.complete();
-  }
-
-  public loadRecords(event: LazyLoadEvent): void {
-    this.loading$.next(true);
-    this.recordsService.getData(event.first, event.rows);
   }
 
   public dropdownChangeHandler(event): void {

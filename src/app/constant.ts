@@ -74,3 +74,10 @@ export const TABLE_DATA: Record[]  = [
     dataType: 'boolean',
   },
 ];
+
+
+export const PER_PAGE = [
+  {name: '3', code: 3},
+  {name: '5', code: 5},
+  {name: '10', code: 10},
+];

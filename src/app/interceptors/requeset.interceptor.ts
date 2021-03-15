@@ -9,7 +9,6 @@ export class RequestInterceptor implements HttpInterceptor {
 
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const params = req.params;
-    console.log(params)
     const page = params.has('page')
       ? params.get('page')
       : null;
@@ -18,7 +17,7 @@ export class RequestInterceptor implements HttpInterceptor {
       ? params.get('perPage')
       : null;
 
-    const data = this.mockBackend.getPaginateData(+page, +perPage);
+    const data = this.mockBackend.getData(+page, +perPage);
     return of(new HttpResponse({status: 200, body: data}))
   }
 
