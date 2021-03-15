@@ -12,11 +12,13 @@ import { RequestInterceptor } from './interceptors/requeset.interceptor';
 import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DataTypePipe } from './pipes/data-type.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
-    TableComponent
+    TableComponent,
+    DataTypePipe
   ],
   imports: [
     CommonModule,

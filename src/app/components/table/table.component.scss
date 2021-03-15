@@ -7,11 +7,16 @@
 
   .paginator__controls {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
 
     & > :not(:last-child) {
       margin-right: 20px;
     }
   }
+
+  ::ng-deep .p-datatable.p-datatable-gridlines .p-datatable-tbody > tr > td {
+    border-width: 0 0 1px 0;
+  }
 }
+

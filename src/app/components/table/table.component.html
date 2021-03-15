@@ -4,34 +4,8 @@
   pagination: pagination$ | async
 } as observable">
 
-  <p-table
-    [value]="observable.pagination.data"
-    [loading]="observable.loading"
-    [(rows)]="rows"
-    [(first)]="first"
-    >
-    <ng-template pTemplate="header">
-      <tr>
-        <th>Id</th>
-        <th>Наименование</th>
-        <th>Системное имя</th>
-        <th>Тип данных</th>
-        <th>Описание</th>
-      </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-record>
-      <tr>
-        <td>{{ record.id }}</td>
-        <td>{{ record.name }}</td>
-        <td>{{ record.systemName }}</td>
-        <td>{{ record.dataType }}</td>
-        <td>{{ record.description }}</td>
-      </tr>
-    </ng-template>
-  </p-table>
-
   <div *ngIf="usePaginator" class="paginator__controls">
-    <div>
+    <div class="p-component">
       На странице &nbsp;
       <p-dropdown
         optionLabel="name"
@@ -42,12 +16,83 @@
         >
       </p-dropdown>
     </div>
-    <div>
+    <div class="p-component">
       Страница {{ paginatorRef.currentPage }} из {{ observable.totalPage }}
     </div>
-    <p-button type="button" icon="pi pi-chevron-left" (click)="paginatorRef.prevPage()" [disabled]="paginatorRef.isFirst" styleClass="p-button-text"></p-button>
-    <p-button type="button" icon="pi pi-chevron-right" (click)="paginatorRef.nextPage()" [disabled]="paginatorRef.isLast" styleClass="p-button-text"></p-button>
+    <p-button
+      type="button"
+      icon="pi pi-chevron-left"
+      (click)="paginatorRef.prevPage()"
+      [disabled]="paginatorRef.isFirst"
+      styleClass="p-button-text"
+      >
+    </p-button>
+    <p-button
+      type="button"
+      icon="pi pi-chevron-right"
+      (click)="paginatorRef.nextPage()"
+      [disabled]="paginatorRef.isLast"
+      styleClass="p-button-text"
+      >
+    </p-button>
   </div>
 
+  <p-table
+    [value]="observable.pagination.data"
+    [loading]="observable.loading"
+    [columns]="tableColumns"
+    [(rows)]="rows"
+    [resizableColumns]="true"
+    [reorderableColumns]="true"
+    [customSort]="true"
+    (sortFunction)="customSort($event)"
+    styleClass="p-datatable-gridlines"
+    >
+    <ng-template pTemplate="header" let-columns>
+      <tr>
+        <th pSortableColumn="id">Id <p-sortIcon field="id"></p-sortIcon></th>
+
+        <ng-container *ngFor="let col of columns" [ngSwitch]="col.sortable">
+          <th *ngSwitchCase="true" [pSortableColumn]="col.field" pReorderableColumn>
+            <ng-container *ngTemplateOutlet="tableColCeil"></ng-container>
+            <p-sortIcon [field]="col.field"></p-sortIcon>
+          </th>
+
+          <th *ngSwitchCase="false" pReorderableColumn>
+            <ng-container *ngTemplateOutlet="tableColCeil"></ng-container>
+          </th>
+
+          <ng-template #tableColCeil>
+            <span *ngIf="col.reorderable" class="pi pi-bars" ></span>
+            {{col.header}}
+          </ng-template>
+        </ng-container>
+
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-record let-columns="columns">
+      <tr>
+        <td>{{ record.id }}</td>
+        <td *ngFor="let col of columns">
+
+          <ng-container *ngIf="col.field === 'dataType'" [ngSwitch]="record[col.field]">
+            <i *ngSwitchCase="'datestamp'" class="pi pi-calendar"></i>
+
+            <!-- Нет подходящийх иконок -->
+            <span *ngSwitchDefault>&nbsp;&nbsp;&nbsp;</span>
+          </ng-container>
+
+          <ng-container *ngIf="col.field !== 'dataType'; else dataTypeCeil">
+            {{ record[col.field] }}
+          </ng-container>
+
+          <ng-template #dataTypeCeil>
+            {{ record[col.field] | dataType }}
+          </ng-template>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
 </ng-container>
 

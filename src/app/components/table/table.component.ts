@@ -1,15 +1,14 @@
-import { state } from '@angular/animations';
 import { ChangeDetectionStrategy, Component, Inject, Input, OnDestroy } from '@angular/core';
 import { PaginatorPlugin } from '@datorama/akita';
-import { LazyLoadEvent } from 'primeng/api';
 import { Subject } from 'rxjs';
 import { map, takeUntil, tap } from 'rxjs/operators';
-import { PER_PAGE } from '../../constant';
+import { PER_PAGE, TABLE_COLUMNS } from './constant';
 import { Record } from '../../models/record.model';
 import { RecordsService } from '../../services/records.service';
 import { RecordsState } from '../../state/record.store';
 import { RecordsQuery } from '../../state/records.query';
 import { RECORDS_PAGINATOR } from './record.paginator';
+import { SortEvent } from 'primeng/api';
 
 @Component({
   selector: 'app-table',
@@ -35,9 +34,13 @@ export class TableComponent implements OnDestroy {
 
   public dropdownOptions = PER_PAGE;
 
+  public tableColumns = TABLE_COLUMNS;
+
   public rows = 5;
 
-  public first = 0;
+  public sortColumn;
+
+  public sortOrder;
 
   private unsub$ = new Subject();
 
@@ -52,7 +55,7 @@ export class TableComponent implements OnDestroy {
       .pipe(
         takeUntil(this.unsub$),
         tap(() => this.loading$.next(true)),
-        tap((page: number) => this.recordsService.getData(page, this.rows)),
+        tap((page: number) => this.recordsService.getData(page, this.rows, this.sortColumn, this.sortOrder)),
       )
       .subscribe();
   }
@@ -64,6 +67,12 @@ export class TableComponent implements OnDestroy {
 
   public dropdownChangeHandler(event): void {
     this.rows = event.value;
+    this.paginatorRef.refreshCurrentPage();
+  }
+
+  public customSort(event: SortEvent): void {
+    this.sortColumn = event.field;
+    this.sortOrder = event.order;
     this.paginatorRef.refreshCurrentPage();
   }
  }

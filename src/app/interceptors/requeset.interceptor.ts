@@ -9,15 +9,13 @@ export class RequestInterceptor implements HttpInterceptor {
 
   public intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const params = req.params;
-    const page = params.has('page')
-      ? params.get('page')
-      : null;
+    let queryParams = {};
 
-    const perPage = params.has('perPage')
-      ? params.get('perPage')
-      : null;
+    params.keys().forEach((paramsKey: string) => {
+      queryParams = Object.assign(queryParams, {[paramsKey]: params.get(paramsKey)})
+    });
 
-    const data = this.mockBackend.getData(+page, +perPage);
+    const data = this.mockBackend.getData(queryParams);
     return of(new HttpResponse({status: 200, body: data}))
   }
 
