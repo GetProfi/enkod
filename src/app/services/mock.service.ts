@@ -92,18 +92,6 @@ export class MockService {
     const lastPage = Math.ceil(this.tableData.length / perPage);
     let data = this.tableData;
 
-    // Bug
-    if (sortColumn) {
-      data = data.sort((a: Record, b: Record) => {
-        // debugger
-        if (sortOrder < 0) {
-          return +a[sortColumn] - +b[sortColumn];
-        } else {
-          return +b[sortColumn] - +a[sortColumn];
-        }
-      });
-    }
-
     data = data
       .slice((page - 1) * perPage)
       .slice(0, perPage);
